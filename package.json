@@ -1,0 +1,31 @@
+{
+    "name": "MongoNodeApp",
+    "version": "1.0.0",
+    "keywords": [
+        "tsv",
+        "mongodb",
+        "insee",
+        "population",
+        "area",
+        "density"
+    ],
+    "author": "Pierre Fromager",
+    "contributors": [
+        "Pierre Fromager"
+    ],
+    "dependencies": {
+        "mongodb": "^3.1.13"
+    },
+    "devDependencies": {
+        "eslint": "^5.13.0",
+        "eslint-config-airbnb": "^17.1.0",
+        "eslint-plugin-import": "^2.16.0",
+        "eslint-plugin-jsx-a11y": "^6.2.0",
+        "eslint-plugin-react": "^7.12.4"
+    },
+    "scripts": {
+        "lint": "node_modules/.bin/eslint --fix src/*.js",
+        "import": "fixtures/bash/mongoimport.sh",
+        "start": "nodejs src/main.js"
+    }
+}
