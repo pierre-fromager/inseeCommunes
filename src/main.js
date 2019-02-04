@@ -1,6 +1,8 @@
 /* eslint no-unused-expressions: "off" */
 /* eslint no-console: "off" */
+
 const mongoClient = require('mongodb').MongoClient;
+const Profiler = require('./Profiler');
 
 const host = 'localhost';
 const port = 27017;
@@ -10,6 +12,7 @@ const credentials = `${login}:${password}@`;
 const activeDb = 'insee';
 const activeCollection = 'communes';
 const dsn = `mongodb://${credentials}${host}:${port}`;
+const profiling = new Profiler();
 
 const stdoutLn = (content) => {
   process.stdout.write(`${content}\n`);
@@ -32,6 +35,7 @@ const processAggregate = (collection, query, returnedMember = 'count') => new Pr
 });
 
 const popDensity = (collection, departementCode) => {
+  profiling.add(`Δt N°${departementCode}`);
   const agQuery = aggregateSumQuery({ 'Code Département': departementCode }, '$Superficie');
   const procSuperficie = processAggregate(collection, agQuery);
   agQuery[1].$group.count.$sum = '$Population';
@@ -56,21 +60,27 @@ const mongoClientOptions = {
   reconnectInterval: 1000,
 };
 
+profiling.init();
+
 mongoClient.connect(dsn, mongoClientOptions, (err, client) => {
   if (err) throw err;
   const db = client.db(activeDb);
   const col = db.collection(activeCollection);
-  const communesFilter = {'Altitude Moyenne':{'$lt' : 10}};
+  const communesFilter = { 'Altitude Moyenne': { $lt: 1000 } };
   const agDeptCodesQuery = aggregateDistinctQuery(communesFilter, '$Code Département', 'uniqueValues');
   const distinctDepartements = processAggregate(col, agDeptCodesQuery, 'uniqueValues');
   const densityPromisePool = [];
   distinctDepartements.then((departementsCodes) => {
+    profiling.add('init');
     departementsCodes.sort();
     departementsCodes.forEach((code) => {
       densityPromisePool.push(popDensity(col, code));
     });
     Promise.all(densityPromisePool).then((poolResult) => {
       poolResult.forEach(result => displayResult(result));
+      profiling.show(stdoutLn);
+      profiling.add('end');
+      profiling.total(stdoutLn);
       client.close();
     });
   });
