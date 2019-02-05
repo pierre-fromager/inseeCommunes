@@ -45,7 +45,7 @@ vim fixtures/bash/mongoimport.sh
 ```
 
 ```bash
-vim src/main.js
+vim src/Config.js
 ```
 
 and change it according to your db credentials.
