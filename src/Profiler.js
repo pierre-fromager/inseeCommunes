@@ -1,4 +1,4 @@
-module.exports = class Profiler {
+class Profiler {
   constructor() {
     this.init();
   }
@@ -40,4 +40,6 @@ module.exports = class Profiler {
     cb(this.sep);
     cb(`Δtotal ${this.stack[this.stack.length - 1].ts - this.stack[0].ts} ${this.unit}`);
   }
-};
+}
+
+module.exports = Profiler;
